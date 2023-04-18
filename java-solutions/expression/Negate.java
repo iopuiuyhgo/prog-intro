@@ -1,25 +1,19 @@
 package expression;
 
 import expression.exceptions.OverflowException;
-public class Negate implements ExprInt {
-    private final ExprInt exp;
-    public Negate(ExprInt exp) {
+import expression.generic.Operations;
+
+public class Negate<T> implements ExprInt<T> {
+    private final ExprInt<T> exp;
+    private final Operations<T> operations;
+    public Negate(Operations<T> operations, ExprInt<T> exp) {
         this.exp = exp;
+        this.operations = operations;
     }
     public String toString() {
         return "-(" + exp.toString() + ")";
     }
-    public String toMiniString() {
-        if (exp instanceof Const || exp instanceof Variable || exp instanceof Negate || exp instanceof Reverse) {
-            return "- " + exp.toMiniString();
-        } else {
-            return "-(" + exp.toMiniString() + ")";
-        }
-    }
-    @Override
-    public String[] getWpts() {
-        return new String[] {"", ""};
-    }
+
     public boolean equals(Object expression) {
         if (expression == null) {
             return false;
@@ -28,19 +22,16 @@ public class Negate implements ExprInt {
     }
 
     @Override
-    public int evaluate(int x) {
+    public T evaluate(T x) {
         return calculate(exp.evaluate(x));
     }
 
     @Override
-    public int evaluate(int x, int y, int z) {
+    public T evaluate(T x, T y, T z) {
         return calculate(exp.evaluate(x, y, z));
     }
 
-    private int calculate(int e) {
-        if (e == -2147483648) {
-            throw new OverflowException("Overflow up: -(-2147483648) > 2147483647");
-        }
-        return -e;
+    private T calculate(T e) {
+        return operations.negate(e);
     }
 }

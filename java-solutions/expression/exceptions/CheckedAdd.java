@@ -1,9 +1,10 @@
 package expression.exceptions;
 
 import expression.*;
+import expression.generic.Operations;
 
-public class CheckedAdd extends Add implements ExprInt{
-    public CheckedAdd(ExprInt leftExp, ExprInt rightExp) {
-        super(leftExp, rightExp);
+public class CheckedAdd<T> extends Add<T>{
+    public CheckedAdd(Operations<T> operations, ExprInt<T> leftExp, ExprInt<T> rightExp) {
+        super(operations, leftExp, rightExp);
     }
 }

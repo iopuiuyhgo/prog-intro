@@ -2,9 +2,10 @@ package expression.exceptions;
 
 import expression.ExprInt;
 import expression.Set;
+import expression.generic.Operations;
 
-public class CheckedSet extends Set implements ExprInt {
-    public CheckedSet (ExprInt leftExp, ExprInt rightExp) {
-        super(leftExp, rightExp);
+public class CheckedSet<T> extends Set<T> {
+    public CheckedSet (Operations<T> operations, ExprInt<T> leftExp, ExprInt<T> rightExp) {
+        super(operations, leftExp, rightExp);
     }
 }

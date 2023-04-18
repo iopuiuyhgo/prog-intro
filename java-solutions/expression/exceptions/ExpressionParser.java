@@ -1,12 +1,13 @@
 package expression.exceptions;
 
 import expression.*;
+import expression.generic.Operations;
+
 import java.util.ArrayDeque;
 import java.util.HashMap;
-import java.util.InputMismatchException;
 
-public class ExpressionParser implements TripleParser {
-    private final ArrayDeque<TripleExpression> tokens= new ArrayDeque<>();
+public class ExpressionParser<T> implements TripleParser<T> {
+    private final ArrayDeque<TripleExpression<T>> tokens= new ArrayDeque<>();
     private final ArrayDeque<String> operands = new ArrayDeque<>();
     private HashMap<Integer, Integer> brackets = new HashMap<>();
     private final String[] operations = new String[] {"+", "-", "*", "/", "set", "clear"};
@@ -15,14 +16,16 @@ public class ExpressionParser implements TripleParser {
     private String expression;
     private int pos;
     private int len;
+    private Operations<T> oper;
 
-    public TripleExpression parse(String expression, int position, int length, HashMap<Integer, Integer> brackets) {
+    private TripleExpression<T> parse(String expression, int position, int length, HashMap<Integer, Integer> brackets, Operations<T> oper) {
         tokens.clear();
         operands.clear();
         this.expression = expression;
         this.len = length;
         this.pos = position;
         this.brackets = brackets;
+        this.oper = oper;
         tokens.add(getToken());
         if (pos == len) {
             return tokens.removeFirst();
@@ -57,12 +60,13 @@ public class ExpressionParser implements TripleParser {
         return -1;
     }
     @Override
-    public TripleExpression parse(String expression) {
+    public TripleExpression<T> parse(String expression, Operations<T> oper) {
 //        System.out.println(expression);
         this.pos = 0;
         this.len = expression.length();
+        this.oper = oper;
         findCloseBracket(expression);
-        return parse(expression, 0, expression.length(), brackets);
+        return parse(expression, 0, expression.length(), brackets, oper);
     }
     private void findCloseBracket(String expression) {
         brackets.clear();
@@ -159,24 +163,24 @@ public class ExpressionParser implements TripleParser {
         }
 
     }
-    private ExprInt doOperation(String operation, TripleExpression firstToken, TripleExpression secondToken) {
-        ExprInt token1 = (ExprInt) firstToken;
-        ExprInt token2 = (ExprInt) secondToken;
+    private ExprInt<T> doOperation(String operation, TripleExpression<T> firstToken, TripleExpression<T> secondToken) {
+        ExprInt<T> token1 = (ExprInt<T>) firstToken;
+        ExprInt<T> token2 = (ExprInt<T>) secondToken;
         return switch (operation) {
-            case "+" -> new Add(token1, token2);
-            case "-" -> new Subtract(token1, token2);
-            case "*" -> new Multiply(token1, token2);
-            case "/" -> new Divide(token1, token2);
-            case "set" -> new Set(token1, token2);
-            case "clear" -> new Clear(token1, token2);
+            case "+" -> new Add<T>(oper, token1, token2);
+            case "-" -> new Subtract<T>(oper, token1, token2);
+            case "*" -> new Multiply<T>(oper, token1, token2);
+            case "/" -> new Divide<T>(oper, token1, token2);
+            case "set" -> new Set<T>(oper, token1, token2);
+            case "clear" -> new Clear<T>(oper, token1, token2);
             default -> throw new IllegalArgumentException("Wrong operation: " + "'" + operation + "'");
         };
     }
-    private TripleExpression getToken() {
+    private TripleExpression<T> getToken() {
         if (pos == len) {
             throw new StructureException("in '" + new StringBuilder(expression).replace(pos, pos, "~~~> <~~~") + "' missed argument in " + (pos+1) + " position");
         }
-        TripleExpression token = null;
+        TripleExpression<T> token = null;
         skipWhiteSpaces();
         if (expression.charAt(pos) == '-') {
             if (pos == len-1) {
@@ -184,16 +188,9 @@ public class ExpressionParser implements TripleParser {
             }
             if (!Character.isDigit(expression.charAt(pos+1))) {
                 pos++;
-                return new Negate((ExprInt) getToken());
+                return new Negate<T>(oper, (ExprInt<T>) getToken());
             }
         } else if (expression.charAt(pos) == 'c'){
-//            System.out.println(pos);
-//            System.out.println(len);
-//            System.out.println(len - pos);
-//            System.out.println(len - pos < 6);
-//            System.out.println(expression);
-//            System.out.println(new StringBuilder(expression).replace(0, pos, ""));
-//            System.out.println(new StringBuilder(expression).replace(0, pos, "").replace(5, Integer.MAX_VALUE, ""));
             skipWhiteSpaces();
             if (len - pos < 6) {
                 throw new StructureException("in '" + new StringBuilder(expression).replace(pos+5, pos+5, "~~~> <~~~") + "' missed argument in " + (pos+5) + " position");
@@ -206,23 +203,20 @@ public class ExpressionParser implements TripleParser {
                 if (len == pos) {
                     throw new StructureException("in '" + new StringBuilder(expression).replace(pos, pos, "~~~> <~~~") + "' missed argument in " + (pos+1) + " position");
                 }
-                return new Count((ExprInt) getToken());
+                return new Count<T>(oper, (ExprInt) getToken());
             } else {
                 throw new StructureException("in '" + new StringBuilder(expression).replace(pos, pos+1, "~~~> " + expression.charAt(pos) + " <~~~") + "' invalid argument: " + "'" + expression.charAt(pos) + "' in " + (pos+1) + " position");
             }
 
-        } else if (expression.charAt(pos) == 'r' && !Character.isDigit(expression.charAt(pos+7))) {
-            pos+=7;
-            return new Reverse((ExprInt) getToken());
         }
         skipWhiteSpaces();
         if (expression.charAt(pos) == 'x' || expression.charAt(pos) == 'y' || expression.charAt(pos) == 'z') {
-            token =  new Variable(Character.toString(expression.charAt(pos)));
+            token =  new Variable<T>(Character.toString(expression.charAt(pos)));
             pos++;
         } else if (Character.isDigit(expression.charAt(pos)) || expression.charAt(pos) == '-') {
-            token = new Const(getNum());
+            token = new Const<T>(oper.constant(getNum()));
         } else if (expression.charAt(pos) == '(') {
-            token = new ExpressionParser().parse(expression, pos + 1, brackets.get(pos), brackets);
+            token = new ExpressionParser<T>().parse(expression, pos + 1, brackets.get(pos), brackets, oper);
             pos = brackets.get(pos) + 1;
         }
         if (token == null) {

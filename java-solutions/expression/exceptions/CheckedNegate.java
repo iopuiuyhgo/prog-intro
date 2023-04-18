@@ -1,9 +1,10 @@
 package expression.exceptions;
 
 import expression.*;
+import expression.generic.Operations;
 
-public class CheckedNegate extends Negate implements ExprInt {
-    public CheckedNegate(ExprInt exp) {
-        super(exp);
+public class CheckedNegate<T> extends Negate<T> {
+    public CheckedNegate(Operations<T> operations, ExprInt<T> exp) {
+        super(operations, exp);
     }
 }

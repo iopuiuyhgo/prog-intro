@@ -1,20 +1,16 @@
 package expression;
 
-public class Const extends AbstractElem implements ExprInt {
-    private final int constantInt;
+public class Const<T> extends AbstractElem<T> {
+    private final T constant;
 
-    public Const(int constant) {
+    public Const(T constant) {
         super(String.valueOf(constant));
-        this.constantInt = constant;
+        this.constant = constant;
     }
-    public Const(double constant) {
-        super(String.valueOf(constant));
-        this.constantInt = (int) constant;
+    public T evaluate(T x) {
+        return constant;
     }
-    public int evaluate(int x) {
-        return constantInt;
-    }
-    public int evaluate(int x, int y, int z) {
-        return constantInt;
+    public T evaluate(T x, T y, T z) {
+        return constant;
     }
 }

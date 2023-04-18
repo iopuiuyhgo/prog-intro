@@ -1,5 +1,6 @@
 package expression;
 
-public interface Expression extends ToMiniString {
-    int evaluate(int x);
+public interface Expression<T> {
+
+    T evaluate(T x);
 }

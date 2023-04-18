@@ -1,41 +1,28 @@
 package expression;
 
-public class Count implements ExprInt{
-    private final ExprInt exp;
-    public Count(ExprInt exp) {
+import expression.generic.Operations;
+
+public class Count<T> implements ExprInt<T>{
+    private final ExprInt<T> exp;
+    private final Operations<T> operations;
+    public Count(Operations<T> operations, ExprInt<T> exp) {
         this.exp = exp;
+        this.operations = operations;
     }
     public String toString() {
         return "count(" + exp + ")";
     }
-    public String toMiniString() {
-        if (exp instanceof Const || exp instanceof Variable || exp instanceof Negate || exp instanceof Reverse) {
-            return "count " + exp.toMiniString();
-        } else {
-            return "count(" + exp.toMiniString() + ")";
-        }
-    }
 
     @Override
-    public String[] getWpts() {
-        return new String[] {"", ""};
-    }
-
-    @Override
-    public int evaluate(int x) {
+    public T evaluate(T x) {
         return calculate(exp.evaluate(x));
     }
 
     @Override
-    public int evaluate(int x, int y, int z) {
+    public T evaluate(T x, T y, T z) {
         return calculate(exp.evaluate(x, y, z));
     }
-    private int calculate(int e) {
-        int end = 0;
-        while (e != 0) {
-            end += e & 1;
-            e = e >>> 1;
-        }
-        return end;
+    private T calculate(T e) {
+        return operations.count(e);
     }
 }

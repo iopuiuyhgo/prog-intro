@@ -3,9 +3,10 @@ package expression.exceptions;
 import expression.AbstractExp;
 import expression.Clear;
 import expression.ExprInt;
+import expression.generic.Operations;
 
-public class CheckedClear extends Clear implements ExprInt {
-    public CheckedClear(ExprInt leftExp, ExprInt rightExp) {
-        super(leftExp, rightExp);
+public class CheckedClear<T> extends Clear<T> {
+    public CheckedClear(Operations<T> operations, ExprInt<T> leftExp, ExprInt<T> rightExp) {
+        super(operations, leftExp, rightExp);
     }
 }

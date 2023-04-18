@@ -1,14 +1,21 @@
 package expression;
 
-public class Set extends AbstractExp implements ExprInt {
-    public Set(ExprInt leftExp, ExprInt rightExp) {
-        super(leftExp, rightExp, "set", new String[] {"* / + -", "* / + -"});
+import expression.generic.Operations;
+
+public class Set<T> extends AbstractExp<T> {
+    public Set(Operations<T> operations, ExprInt<T> leftExp, ExprInt<T> rightExp) {
+        super(operations, leftExp, rightExp);
     }
-    public int evaluate(int x) {
+    public T evaluate(T x) {
 //        (x & (~(1 << n))) | (y << n)
-        return leftExp.evaluate(x) & (~(1<< rightExp.evaluate(x))) | (1 << rightExp.evaluate(x));
+        return operations.set(leftExp.evaluate(x), rightExp.evaluate(x));
     }
-    public int evaluate(int x, int y, int z) {
-        return leftExp.evaluate(x, y, z) & (~(1<< rightExp.evaluate(x, y, z))) | (1 << rightExp.evaluate(x, y, z));
+    public T evaluate(T x, T y, T z) {
+        return operations.set(leftExp.evaluate(x, y, z), rightExp.evaluate(x, y, z));
+    }
+
+    @Override
+    String getOperator() {
+        return "set";
     }
 }

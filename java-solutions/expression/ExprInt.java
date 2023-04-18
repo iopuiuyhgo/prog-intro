@@ -1,5 +1,5 @@
 package expression;
 
-public interface ExprInt extends Expression, TripleExpression {
-    String[] getWpts();
+public interface ExprInt<T> extends Expression<T>, TripleExpression<T> {
+
 }

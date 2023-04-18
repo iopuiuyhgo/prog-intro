@@ -1,44 +1,22 @@
 package expression;
 
-public abstract class AbstractExp implements ExprInt {
-    protected ExprInt leftExp;
-    protected ExprInt rightExp;
-    private final String operator;
-    private final StringBuilder toStr = new StringBuilder();
-    private final String[] wpts;
-    public String[] getWpts() {
-        return wpts;
-    }
-    public AbstractExp(ExprInt leftExp, ExprInt rightExp, String operator, String[] wpts) {
+import expression.generic.Operations;
+
+public abstract class AbstractExp<T> implements ExprInt<T> {
+    protected Operations<T> operations;
+    protected ExprInt<T> leftExp;
+    protected ExprInt<T> rightExp;
+    abstract String getOperator();
+    public AbstractExp(Operations<T> operations, ExprInt<T> leftExp, ExprInt<T> rightExp) {
         this.leftExp = leftExp;
         this.rightExp = rightExp;
-        this.operator = operator;
-        this.wpts = wpts;
+        this.operations = operations;
 
-        addToStr(leftExp.getWpts()[0].split(" "), leftExp.toMiniString(), true);
-        addToStr(rightExp.getWpts()[1].split(" "), rightExp.toMiniString(), false);
     }
-    private void addToStr(String[] ws, String toMiniString, boolean isLeft) {
-        for (int i = 0; i < ws.length; i++) {
-            if (ws[i].equals(operator)) {
-                toStr.append("(" + toMiniString + ")");
-                break;
-            }
-            if (i == ws.length - 1) {
-                toStr.append(toMiniString);
-            }
-        }
-        if (isLeft) {
-            toStr.append(" " + operator + " ");
-        }
-    }
-    @Override
-    public String toMiniString() {
-        return toStr.toString();
-    }
+
     @Override
     public String toString() {
-        return "("+ leftExp.toString() + " " + operator + " " + rightExp.toString() + ")";
+        return "("+ leftExp.toString() + " " + getOperator() + " " + rightExp.toString() + ")";
     }
     @Override
     public boolean equals(Object expression) {
